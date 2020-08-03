@@ -18,3 +18,6 @@ Hoshino插件合集on-mirai
 fullmatch触发词#回复
 ## 其他说明
 不定期更新
+### reply(自定义回复)
+## 其他说明
+不定期更新
