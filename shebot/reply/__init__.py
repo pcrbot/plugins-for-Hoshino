@@ -126,7 +126,7 @@ keyword = KeywordHandler()
 rex = RexHandler()
 chain = [fullmatch, keyword, rex]
 
-sv = Service('问答测试版')
+sv = Service('自定义问答', use_priv=999)
 @sv.on_message()
 async def reply(bot, ctx):
     for h in chain:
