@@ -1,8 +1,13 @@
 # plugins-for-Hoshino
 Hoshino插件合集on-mirai
+## 环境
+mirai + cqhttp-mirai
+cqhttp-mirai项目地址
+https://github.com/yyuueexxiinngg/cqhttp-mirai.git
 ## 使用方法
 1.util4sh.py放在hoshino目录下，shebot的插件使用的一些函数及类均在此文件
 2.shebot文件夹放在modules下
+3.安装requirements.txt里的依赖
 ## 插件列表
 ### QA(你问我答)
 #### 指令
@@ -30,7 +35,9 @@ ps:
 |删除fullmatch\|keyword\|rex<触发词>||
 
 ps:
-网页版正在开发中
+自定义回复有网页端管理，按照web4reply里的readme.txt设置
+### setu(涩图)
+看里面的readme.txt,写累了
 ## 其他说明
 不定期更新
 ### reply(自定义回复)
