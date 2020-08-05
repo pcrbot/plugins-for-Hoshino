@@ -12,7 +12,7 @@ import os
 logger = new_logger('shebot')
 
 async def download_async(url: str, save_path: str, save_name: str) -> None:
-    timeout = aiohttp.ClientTimeout(total=30)
+    timeout = aiohttp.ClientTimeout(total=60)
     async with aiohttp.ClientSession(timeout=timeout) as session:
         async with session.get(url) as resp:
             content = await resp.read()
@@ -24,6 +24,11 @@ async def download_async(url: str, save_path: str, save_name: str) -> None:
             with open(abs_path, 'wb') as f:
                 f.write(content)
                 return abs_path
+
+def get_random_file(path) -> str:
+    files = os.listdir(path)
+    rfile = random.choice(files)
+    return rfile
 
 class Res:
     res_dir = path.join(path.dirname(__file__), 'modules', 'shebot', 'res')
@@ -51,7 +56,11 @@ class Res:
                     logger.warning(f'保存图片时发生错误{ex}')
         event.raw_message = str(event.message)
 
-def get_random_file(path) -> str:
-    files = os.listdir(path)
-    rfile = random.choice(files)
-    return rfile
+    @classmethod
+    def get_random_image(cls, folder=None) -> 'MessageSegment':
+        if not folder:
+            image_path = cls.image_dir
+        else:
+            image_path = path.join(cls.image_dir, folder)
+        image_name = get_random_file(image_path)
+        return MessageSegment.image(path.join(image_path, image_name))
