@@ -64,3 +64,57 @@ class Res:
             image_path = path.join(cls.image_dir, folder)
         image_name = get_random_file(image_path)
         return MessageSegment.image(path.join(image_path, image_name))
+
+from nonebot import scheduler
+import datetime
+import nonebot
+bot = nonebot.get_bot()
+def add_delay_job(task,id=None,delay_time:int=30,args=[]):
+    now = datetime.datetime.now()
+    job = scheduler.add_job(task,'date',id=id,run_date=now+datetime.timedelta(seconds=delay_time),misfire_grace_time=5,args=args)
+    return job
+
+def add_date_job(task,id=None,run_date=None,args=[]):
+    job = scheduler.add_job(task,'date',id=id,run_date=run_date,args=args)
+    return job
+
+def add_cron_job(task,id=None,hour='*',minute='0',second='0',args=[]):
+    job = scheduler.add_job(task,'cron',id=id,hour=hour,minute=minute,second=second,misfire_grace_time=5,args=args)
+    return job
+
+import json
+def save_config(config:dict,path:str):
+    try:
+        with open(path,'w',encoding='utf8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as ex:
+        logger.error(ex)
+        return False
+
+def load_config(path):
+    try:
+        with open(path, mode='r', encoding='utf-8') as f:
+            config = json.load(f)
+            return config
+    except Exception as ex:
+        logger.error(f'exception occured when loading config in {path}  {ex}')
+        logger.exception(ex)
+        return {}
+
+import asyncio
+from hoshino.service import Service
+async def broadcast(msg,groups=None,sv_name=None):
+    bot = nonebot.get_bot()
+    #当groups指定时，在groups中广播；当groups未指定，但sv_name指定，将在开启该服务的群广播
+    svs = Service.get_loaded_services()
+    if not groups and sv_name not in svs:
+        raise ValueError(f'不存在服务 {sv_name}')
+    send_groups = svs[sv_name].enable_groups if not groups else groups
+    for gid in send_groups:
+        try:
+            await bot.send_group_msg(group_id=gid,message=msg)
+            logger.info(f'群{gid}投递消息成功')
+            await asyncio.sleep(0.5)
+        except:
+            logger.error(f'在群{gid}投递消息失败')

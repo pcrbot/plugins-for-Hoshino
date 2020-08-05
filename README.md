@@ -5,9 +5,9 @@ mirai + cqhttp-mirai
 cqhttp-mirai项目地址
 https://github.com/yyuueexxiinngg/cqhttp-mirai.git
 ## 使用方法
-1.util4sh.py放在hoshino目录下，shebot的插件使用的一些函数及类均在此文件
-2.shebot文件夹放在modules下并在config里启用该模组
-3.安装requirements.txt里的依赖
+1. util4sh.py放在hoshino目录下，shebot的插件使用的一些函数及类均在此文件
+2. shebot文件夹放在modules下并在config里启用该模组
+3. 安装requirements.txt里的依赖
 ## 插件列表
 ### QA(你问我答)
 #### 指令
@@ -34,10 +34,31 @@ ps:
 |rex<触发词>#<回复>|正则匹配|
 |删除fullmatch\|keyword\|rex<触发词>||
 
+### scheduledMessage(定时发送消息)
+#### 指令(OWNER以上权限使用)
+|指令|说明|
+|-----|-----|
+|闹钟|根据bot发送的消息进行设置|
+|查看计划任务||
+|删除计划任务<任务id>|id通过查看计划任务获得|
+
 ps:
-自定义回复有网页端管理，按照web4reply里的readme.txt设置
-同样支持以下变量：
-【艾特全体】、【艾特当前】、【随机图片<文件夹>】
+1. 多个时间逗号隔开，逗号使用英文逗号，且之间不要空格
+2. 使用命令添加的仅当前群生效，如果要设置多个群，直接将jobs.json里groups字段设置为'default'
+3. 同样支持以下变量：【艾特全体】、【艾特当前】、【随机图片<文件夹>】
+
+### scheduledCommand(定时执行命令)
+#### 指令(ADMIN以上权限使用)
+|指令|说明|
+|-----|-----|
+|add_delay_job|根据bot发送的消息进行设置|
+|add_cron_job|根据bot发送的消息进行设置|
+|show_cron_job|查看定时执行命令|
+|cancel_cron_job|删除定时命令|
+
+ps:
+1. 多个时间逗号隔开，逗号使用英文逗号，且之间不要空格
+
 ### setu(涩图)
 看里面的readme.txt,写累了
 ## 其他说明
