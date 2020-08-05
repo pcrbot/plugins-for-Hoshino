@@ -126,9 +126,10 @@ keyword = KeywordHandler()
 rex = RexHandler()
 chain = [fullmatch, keyword, rex]
 
-sv = Service('自定义问答', use_priv=999)
-@sv.on_message()
-async def reply(bot, ctx):
+import nonebot
+bot = nonebot.get_bot()
+@bot.on_message()
+async def reply(ctx):
     for h in chain:
         reply = h.find_reply(ctx)
         if reply:
@@ -137,7 +138,7 @@ async def reply(bot, ctx):
     else:
         pass
 
-
+sv = Service('自定义问答', use_priv=999)
 from hoshino.util4sh import Res
 @sv.on_rex(r'((?:fullmatch)|(?:keyword)|(?:rex)).{1,200}#.{1,200}')
 async def add_reply(bot, event):

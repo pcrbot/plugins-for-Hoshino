@@ -6,7 +6,7 @@ cqhttp-mirai项目地址
 https://github.com/yyuueexxiinngg/cqhttp-mirai.git
 ## 使用方法
 1.util4sh.py放在hoshino目录下，shebot的插件使用的一些函数及类均在此文件
-2.shebot文件夹放在modules下
+2.shebot文件夹放在modules下并在config里启用该模组
 3.安装requirements.txt里的依赖
 ## 插件列表
 ### QA(你问我答)
@@ -36,10 +36,9 @@ ps:
 
 ps:
 自定义回复有网页端管理，按照web4reply里的readme.txt设置
+同样支持以下变量：
+【艾特全体】、【艾特当前】、【随机图片<文件夹>】
 ### setu(涩图)
 看里面的readme.txt,写累了
-## 其他说明
-不定期更新
-### reply(自定义回复)
 ## 其他说明
 不定期更新
