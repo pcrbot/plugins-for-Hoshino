@@ -16,12 +16,15 @@ class VarHandler:
         return self.allvar.get(var)
 
 var_handler = VarHandler()
-def replace(origin_msg: MessageSegment, event: Event):
-    msg_str = str(origin_msg)
-    allvar = re.findall('【.+?】', msg_str) #取出变量列表,变量可能含有参数
+def replace(origin_msg_str: str, event: Event) -> MessageSegment:
+    allvar = re.findall('【.+?】', origin_msg_str) #取出变量列表,变量可能含有参数
+
     if not allvar:
         #没有变量，直接返回原消息 
-        return origin_msg
+        return origin_msg_str
+
+    replaced_msg_str = origin_msg_str
+
     for compelete_v in allvar:
         # 取出参数列表
         args = [x.strip('<').strip('>') for x in re.findall('<.+?>', compelete_v)]
@@ -29,14 +32,16 @@ def replace(origin_msg: MessageSegment, event: Event):
         func = var_handler.find_func(stripped_v)
         if func:
             try:
-                replaced_msg = func(*args) 
+                replace_msg = func(*args) 
             except TypeError: #异常说明函数需要event参数
-                replaced_msg = func(*args, event)
+                replace_msg = func(*args, event)
             except:
-                return origin_msg
-            return replaced_msg
+                replace_msg = compelete_v
+                continue
+            replaced_msg_str = replaced_msg_str.replace(compelete_v, str(replace_msg))
         else:
-            return origin_msg #没有找到处理函数，返回原消息
+            continue #没有找到处理函数
+    return replaced_msg_str
 
 def add_replace(var_name: str):
     def deco(func):
@@ -47,12 +52,19 @@ def add_replace(var_name: str):
 bot = nonebot.get_bot()
 @bot.before_sending
 async def var_replace(event: Event, message: Message, kwargs: Dict[str, Any]):
-    for i, msg in enumerate(message):
-        replaced_msg = replace(msg, event=event)
-        message[i] = replaced_msg
+    origin_msg_str = str(message)
+    repaced_msg_str = replace(origin_msg_str, event)
+    message.clear()
+    message.extend(repaced_msg_str)
+
+
 
 from hoshino.util4sh import get_random_file, Res as R
 from os import path
+"""
+可以按照如下格式添加变量，如果需要使用event，添加在最后一个参数
+返回值为str或者MessageSegment
+"""
 @add_replace('随机图片')
 def random_pic(folder: str) -> 'MessageSegment':
     #例 【随机图片<智乃>】
