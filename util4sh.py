@@ -1,8 +1,9 @@
 from traceback import print_exc
-from nonebot.message import MessageSegment
+from nonebot.message import MessageSegment, Message
 from aiocqhttp.event import Event
 from os import path
 from hoshino.log import new_logger
+from typing import Callable
 import re
 import random
 import aiohttp
@@ -11,15 +12,16 @@ import os
 
 logger = new_logger('shebot')
 
-async def download_async(url: str, save_path: str, save_name: str) -> None:
-    timeout = aiohttp.ClientTimeout(total=60)
+async def download_async(url: str, save_path: str, save_name: str, suffix=None) -> None:
+    timeout = aiohttp.ClientTimeout(total=30)
     async with aiohttp.ClientSession(timeout=timeout) as session:
         async with session.get(url) as resp:
             content = await resp.read()
-            try:
-                suffix = filetype.guess_mime(content).split('/')[1]
-            except:
-                raise ValueError('不是有效文件类型')
+            if not suffix: #没有指定后缀，自动识别后缀名
+                try:
+                    suffix = filetype.guess_mime(content).split('/')[1]
+                except:
+                    raise ValueError('不是有效文件类型')
             abs_path = path.join(save_path, f'{save_name}.{suffix}')
             with open(abs_path, 'wb') as f:
                 f.write(content)
@@ -180,3 +182,16 @@ class RSS():
     def parse_xml(self):
         #在实现类中编写解析xml函数
         raise NotImplementedError
+
+from hoshino.modules.priconne.cherugo import cheru2str
+def cherugo_also(func: Callable) -> Callable:
+    async def deco(*args):
+        bot, event, _ = tuple(args)
+        await func(bot, event, _)
+        raw_message = event.raw_message
+        cherugo_decode = cheru2str(raw_message)
+        event.raw_message = cherugo_decode
+        event.message.clear()
+        event.message.append(MessageSegment.text(cherugo_decode))
+        await func(bot, event, _)
+    return deco

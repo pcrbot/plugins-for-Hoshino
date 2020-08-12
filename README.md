@@ -80,10 +80,18 @@ ps:
 
 ### infoPush(偏通用型的消息推送)
 #### 指令
-在__init__.py里按照注释添加service和路由，所有路由请见https://docs.rsshub.app/。并非所有类型的路由都经过测试，bilibili动态，pcr官网，github issue这些经测试都可以正常使用。
+在__init__.py里按照注释添加service和路由，所有路由请见https://docs.rsshub.app/。 并非所有类型的路由都经过测试，bilibili动态，pcr官网，github issue这些经测试都可以正常使用。
 
 ps:
 同直播提醒
+
+### 切噜语触发命令
+这个不是插件，算是魔改hoshino，修改后hoshino的命令可以使用切噜语触发。不过考虑到hoshino精妙的代码，不希望改动过多，所以选择添加一个装饰器实现。使用方法：在hoshino下msghandler.py添加两行代码
+1. from hoshino.util4sh import cherugo_also,这行代码写在@message_preprocessor上方任意位置
+2. @cherugo_also ,这行代码插入@message_preprocessor下方一行。
+因为修改了hoshino消息处理（理论上应该对正常使用没影响，）如果不想使用或者出现不可预料的bug将@cherugo_also装饰器注释即可。
+## 其他说明
+不定期更新
 
 ### setu(涩图)
 看里面的readme.txt,写累了
