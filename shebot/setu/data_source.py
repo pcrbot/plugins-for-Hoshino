@@ -3,6 +3,7 @@ import os
 import json
 from .api import get_final_setu
 from queue import Queue
+from .config import DELETE_AFTER
 
 
 class SetuWarehouse:
@@ -58,7 +59,7 @@ def load_config():
     except:
         return {}
 
-from hoshino.util4sh import Res as R
+from .._res import Res as R
 async def send_setus(bot,ctx,folder,setus,with_url=False,is_to_delete=False):
     reply = ''
     for setu in setus:
@@ -73,5 +74,5 @@ async def send_setus(bot,ctx,folder,setus,with_url=False,is_to_delete=False):
     if is_to_delete:
         msg_id = ret['message_id']
         self_id = ctx['self_id']
-        await asyncio.sleep(30)
+        await asyncio.sleep(DELETE_AFTER)
         await bot.delete_msg(self_id=self_id, message_id=msg_id)

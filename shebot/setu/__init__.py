@@ -1,21 +1,18 @@
-import re
-import os
-import asyncio
-from aiocqhttp.event import Event
-import threading 
+import threading
 
-from os import path
-from .api import get_final_setu_async
-from .data_source import SetuWarehouse, save_config,load_config,send_setus
-from .config import *
 from hoshino.service import Service
-from aiocqhttp.message import MessageSegment
+from hoshino.priv import *
+from hoshino.util import DailyNumberLimiter, FreqLimiter
+from .api import *
+from .config import *
+from .data_source import *
+from .._util import *
+from .._res import Res as R
 
 g_config = load_config()
 g_r18_groups = set(g_config.get('r18_groups',[]))
 g_delete_groups = set(g_config.get('delete_groups',[]))
 
-from hoshino.util4sh import Res as R
 #初始化色图仓库
 nr18_path = path.join(R.image_dir, 'nr18_setu') #存放非r18图片
 r18_path = path.join(R.image_dir, 'r18_setu') #存放r18图片
@@ -23,7 +20,7 @@ search_path = path.join(R.image_dir, 'search_setu') #存放搜索图片
 if not os.path.exists(search_path):
     os.mkdir(search_path)
 wh = SetuWarehouse(nr18_path)
-r18_wh = SetuWarehouse(r18_path,r18=1)
+r18_wh = SetuWarehouse(r18_path, r18=1)
 
 #启动一个线程一直补充色图
 thd = threading.Thread(target=wh.keep_supply)
@@ -38,14 +35,10 @@ if ONLINE_MODE:
     thd_r18.start()
 
 #设置limiter
-from hoshino.util import DailyNumberLimiter, FreqLimiter
 _num_limiter = DailyNumberLimiter(DAILY_MAX_NUM)
 _freq_limiter = FreqLimiter(5)
 
-
-from hoshino.priv import *
-from hoshino.util4sh import download_async
-sv = Service('涩图')
+sv = Service('色图')
 @sv.on_rex(r'^来?([1-5])?[份点张]?[涩色瑟]图(.{0,10})$')
 async def send_common_setu(bot,event: Event):
     uid = event.user_id
@@ -62,17 +55,6 @@ async def send_common_setu(bot,event: Event):
         await bot.send(event, TOO_FREQUENT_NOTICE)
         return
 
-    if not ONLINE_MODE:
-        sv.logger.info('发送本地涩图')
-        pic = R.get_random_image('nr18_setu')
-        ret = await bot.send(event,  pic)
-        msg_id = ret['message_id']
-        if is_to_delete:
-            #30秒后删除
-            await asyncio.sleep(30)
-            await bot.delete_msg(self_id=self_id, message_id=msg_id)
-        return
-
     robj = event['match']
     try:
         num = int(robj.group(1))
@@ -84,29 +66,42 @@ async def send_common_setu(bot,event: Event):
     _freq_limiter.start_cd(uid,num*5)
 
     keyword = robj.group(2).strip()
+
+    if not ONLINE_MODE and not keyword:
+        sv.logger.info('发送本地涩图')
+        _num_limiter.increase(uid)
+        pic = R.get_random_image('nr18_setu')
+        ret = await bot.send(event,  pic)
+        msg_id = ret['message_id']
+        if is_to_delete:
+            #30秒后删除
+            await asyncio.sleep(DELETE_AFTER)
+            await bot.delete_msg(self_id=self_id, message_id=msg_id)
+        return
     if keyword:
         await bot.send(event, '正在搜索，请稍等~')
+        _freq_limiter.start_cd(uid, 30) # To relieve net pressure
         sv.logger.info(f'含有关键字{keyword}，尝试搜索')
-        if user_priv < SUPERUSER:
+        if not check_priv(event, SUPERUSER): # SUPERUSER 搜图可以搜出r18
             setus = await get_final_setu_async(search_path,keyword=keyword,r18=0)
         else:
-            setus = await get_final_setu_async(search_path,keyword=keyword,r18=2) 
+            setus = await get_final_setu_async(search_path,keyword=keyword,r18=2,num=3) 
         if not setus:
             await bot.send(event, f'没有找到关键字{keyword}的涩图，您将被禁用涩图服务60s')
             _freq_limiter.start_cd(uid, 60)
             sv.logger.info(f'{uid} searched keyword {keyword} and returned no result')
             return
-        setu = setus[0]
-        pic_path = await download_async(setu.url, search_path, setu.pid)
-        pic = MessageSegment.image(pic_path)
-        reply = f'{setu.title}\n画师：{setu.author}\npid:{setu.pid}{pic}'
-        try:
-            await bot.send(event,reply,at_sender=False)
-            _num_limiter.increase(uid)
-            _freq_limiter.start_cd(uid, 30)
-        except Exception as ex:
-            await bot.send(event, f'搜索关键字{keyword}发生异常')
-            sv.logger.error(f'搜索涩图时发生异常 {ex}')
+
+        for setu in setus:
+            print(setus)
+            pic_path = await download_async(setu.url, search_path, str(setu.pid))
+            pic = R.image(pic_path)
+            reply = f'{setu.title}\n画师：{setu.author}\npid:{setu.pid}{pic}'
+            try:
+                await bot.send(event,reply,at_sender=False)
+            except Exception as ex:
+                await bot.send(event, f'搜索关键字{keyword}发生异常')
+                sv.logger.error(f'搜索涩图时发生异常 {ex}')
     else:
         setus = wh.fetch(num)
         if not setus:#send_setus为空
@@ -123,7 +118,7 @@ async def send_r18_setu(bot, event):
     self_id = event['self_id']
 
     if gid not in g_r18_groups and gid!= 0:
-        await bot.send(event,'本群未开启r18色图，请私聊机器人,但注意不要过分请求，否则拉黑')
+        await bot.send(event,'本群未开启r18色图')
         return
 
     if not _num_limiter.check(uid):
@@ -135,13 +130,14 @@ async def send_r18_setu(bot, event):
         return
 
     if not ONLINE_MODE:
+        _num_limiter.increase(uid)
         sv.logger.info('发送本地r18涩图')
-        pic = R.get_random_image('r18_path')
+        pic = R.get_random_image('r18_setu')
         ret = await bot.send(event,pic)
 
         msg_id = ret['message_id']
         if is_to_delete:
-            await asyncio.sleep(30)
+            await asyncio.sleep(DELETE_AFTER)
             await bot.delete_msg(self_id=self_id, message_id=msg_id)
         return   
 
@@ -154,13 +150,12 @@ async def send_r18_setu(bot, event):
 
 @sv.on_message()
 async def switch(bot, event):
-    global g_is_online
     global g_delete_groups
     global g_config
     global g_r18_groups
     msg = event['raw_message']
     gid = event.get('group_id')
-    if get_user_priv(event) < SUPERUSER:
+    if not check_priv(event, SUPERUSER):
         return
 
     elif msg == '本群涩图撤回':
@@ -217,11 +212,3 @@ async def switch(bot, event):
 
     else:
         pass
-
-
-
-
-            
-        
-
-            

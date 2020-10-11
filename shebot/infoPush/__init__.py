@@ -1,11 +1,13 @@
-import nonebot
 import re
-from typing import Dict
-from hoshino.util4sh import RSS, load_config, save_config, broadcast
-from lxml import etree
-from hoshino.service import Service
-from os import path
 from collections import defaultdict
+from os import path
+from typing import Dict
+
+import nonebot
+from lxml import etree
+
+from hoshino.service import Service
+from .._util import RSS, load_config, save_config, broadcast
 
 class Info(RSS):
     def __init__(self,route) -> None:
@@ -41,9 +43,7 @@ _inf_svs = {
         Info('/bilibili/user/dynamic/353840826')
         ],
     Service('B站up动态') : [
-        Info('/bilibili/user/dynamic/282994'), 
-        Info('/bilibili/user/dynamic/11073'),
-        Info('/bilibili/user/dynamic/673816')
+        Info('/bilibili/user/dynamic/282994')
         ]
     #Service('HoshinoIssue推送') : [Info('/github/issue/Ice-Cirno/Hoshinobot')]
 }
@@ -58,16 +58,7 @@ for sv in _inf_svs:
 for info in infos:
     info._latest = _latest_data.get(info.route, '')
 
-from hoshino.util4sh import Res as R
-async def handle_xml_img(xml_str: str) -> str:
-    for label in re.findall('<img src="(.+?)".+?>', xml_str):
-        if re.search('(".+?")', label):
-            url = re.search('(".+?")', label).group(1)
-            pic = await R.image_from_url(url)
-            xml_str = re.sub('<.+?>', str(pic), xml_str, 1)
-    return xml_str
-
-@nonebot.scheduler.scheduled_job('cron', minute='*/5', second='30')
+@nonebot.scheduler.scheduled_job('cron', minute='*', second='30')
 async def check():
     for sv in _inf_svs:
         for info in _inf_svs[sv]:

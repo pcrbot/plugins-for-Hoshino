@@ -1,8 +1,11 @@
-from hoshino.service import Service
-from hoshino.util4sh import RSS, load_config, save_config, broadcast
-from lxml import etree
 from os import path
+
+from lxml import etree
 from nonebot import CommandSession
+
+from hoshino.service import Service
+from  .._util import load_config, save_config, broadcast, RSS
+
 
 class Live(RSS):
     def __init__(self,route:str):
@@ -128,12 +131,12 @@ async def cancel(session:CommandSession):
             del _subscribes[room]
             save_config(_subscribes,subs_path)
             sv.logger.info(f'成功取消直播间{room}的开播提醒')
-            session.send(f'成功取消直播间{room}直播提醒')
+            await session.send(f'成功取消直播间{room}直播提醒')
         else:
             gid = session.event['group_id']
             _subscribes[room]['subs_groups'].remove(gid)
             save_config(_subscribes,subs_path)
-            session.send(f'成功取消直播间{room}直播提醒')
+            await session.send(f'成功取消直播间{room}直播提醒')
 
 
 
