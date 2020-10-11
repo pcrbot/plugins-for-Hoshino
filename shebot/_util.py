@@ -55,8 +55,11 @@ async def broadcast(msg,groups=None,sv_name=None):
     svs = Service.get_loaded_services()
     if not groups and sv_name not in svs:
         raise ValueError(f'不存在服务 {sv_name}')
-    enable_groups = await svs[sv_name].get_enable_groups()
-    send_groups = enable_groups.keys() if not groups else groups
+    if sv_name:
+        enable_groups = await svs[sv_name].get_enable_groups()
+        send_groups = enable_groups.keys() if not groups else groups
+    else:
+        send_groups = groups
     for gid in send_groups:
         try:
             await bot.send_group_msg(group_id=gid,message=msg)

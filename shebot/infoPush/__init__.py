@@ -58,7 +58,7 @@ for sv in _inf_svs:
 for info in infos:
     info._latest = _latest_data.get(info.route, '')
 
-@nonebot.scheduler.scheduled_job('cron', minute='*', second='30')
+@nonebot.scheduler.scheduled_job('cron', minute='*/5', second='30')
 async def check():
     for sv in _inf_svs:
         for info in _inf_svs[sv]:
