@@ -45,5 +45,8 @@ hoshino config文件夹__bot__.py中的HOST请设置为 0.0.0.0以开放公网�
 ### setu(涩图)
 看里面的readme.txt,写累了
 
+### concatHead(接头霸王)
+利用百度人脸识别api接臭鼬头，详见concatHead文件夹下readme
+
 ## 其他说明
 不定期更新
