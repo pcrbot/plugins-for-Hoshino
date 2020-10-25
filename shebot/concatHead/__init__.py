@@ -54,7 +54,7 @@ async def concat_head(bot: HoshinoBot, ev: CQEvent):
     #print(face_data_list)
     try:
         img = Image.open(BytesIO(cont))
-    except:
+    except (UnidentifiedImageError):
         await bot.finish(ev,'暂时不支持二次元图片接头哦~')
     else:
         if not face_data_list:
