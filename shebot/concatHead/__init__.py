@@ -50,12 +50,15 @@ async def concat_head(bot: HoshinoBot, ev: CQEvent):
         async with session.get(url) as resp:
             cont = await resp.read()
             b64 = (base64.b64encode(cont)).decode()
-            img = Image.open(BytesIO(cont))
-
     face_data_list = await detect_face(b64)
     #print(face_data_list)
-    if not face_data_list:
-        await bot.finish(ev, '未检测到人脸信息')
+    try:
+        img = Image.open(BytesIO(cont))
+    except:
+        await bot.finish(ev,'暂时不支持二次元图片接头哦~')
+    else:
+        if not face_data_list:
+            await bot.finish(ev, '未检测到人脸信息')
 
     uid = ev.user_id
     head_name = user_conf_dic.get(uid, 'auto')
