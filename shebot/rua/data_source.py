@@ -15,8 +15,8 @@ def get_circle_avatar(avatar, size):
     return ret_img
 
 def generate_gif(frame_dir: str, avatar: Image.Image) -> Image.Image:
-    avatar_size = [(350,350), (438,280), (500,245), (467,263), (350,350)]
-    avatar_pos = [(50,150), (40,180), (50,200), (30,180), (50,150)]
+    avatar_size = [(350,350), (372,305), (395,283), (380,305), (350,372)]
+    avatar_pos = [(50,150), (28,195), (5,217), (5,195), (50,128)]
     imgs = []
     for i in range(5):
         im = Image.new(mode='RGBA', size=(600, 600), color='white')
