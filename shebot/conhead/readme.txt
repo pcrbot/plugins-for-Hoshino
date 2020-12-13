@@ -5,6 +5,7 @@
 2. 将得到的CLIENT_ID(API Key) CLIENT_SECRET(Secret Key)填入config.py
 如果不使用api模式，可以跳过以上
 3. 安装python的opencv库
+切记： bot目录中一定不能出现中文，否则opencv读取会出现问题
 
 指令：
 接头1+图片——利用api接头
