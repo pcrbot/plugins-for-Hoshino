@@ -46,7 +46,8 @@ hoshino config文件夹__bot__.py中的HOST请设置为 0.0.0.0以开放公网�
 看里面的readme.txt,写累了
 
 ### concatHead(接头霸王)
-利用百度人脸识别api接臭鼬头，详见concatHead文件夹下readme
+利用百度人脸识别api和opencv接臭鼬头，详见conhead文件夹下readme。
+opencv接头模块参考自Hoshino群文件《接头霸王-缝纫包》
 
 ### rua
 | 指令                 | 说明                                                     |
