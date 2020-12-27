@@ -28,5 +28,5 @@ def generate_gif(frame_dir: str, avatar: Image.Image) -> Image.Image:
         im.paste(hand, mask=hand.split()[3])
         imgs.append(im)
     out_path = path.join(frame_dir, 'output.gif')
-    imgs[0].save(fp=out_path, save_all=True, append_images=imgs, duration=0.5, loop=0, quality=80)
+    imgs[0].save(fp=out_path, save_all=True, append_images=imgs, duration=25, loop=0, quality=80)
     return out_path
